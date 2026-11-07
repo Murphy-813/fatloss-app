@@ -23,6 +23,7 @@
 <div id="aiOutput" class="ai-result hide"><div class="ai-warning">⚠️ AI估重与营养计算存在明显误差，尤其是外卖的油、酱汁、遮挡食物。下面每项都可以修改，确认后才会加入本餐，并不会自动记录为已吃。</div><div id="aiItems"></div><div id="aiSummary" class="subtle"></div><div class="actions" style="margin-top:10px"><button class="btn" id="aiAddToMeal" type="button">确认并加入本餐</button><button class="btn ghost" id="aiClear" type="button">清空识别结果</button></div></div>
 <p class="note">未配置AI接口时，原来的“常见份量估算”和自定义食物仍可离线使用。AI识别调用第三方图像API，可能产生费用。</p></div>
 <div class="section"><h2>份量 / 克重估算器</h2><span>常见容器参考，不是称重</span></div>
+<div class="field" style="margin:8px 0 12px"><label for="portionSearch">搜索食物（米饭、牛肉、奶茶等）</label><input id="portionSearch" type="search" placeholder="输入食物名称，筛选下方列表" style="width:100%;padding:11px;border:1px solid #dbe1e8;border-radius:11px"></div><p class="note" id="portionMatches">常见食物可直接选择；如果没有你吃的食物，请使用上方“自定义食物”输入名称及营养值。</p>
 <div class="portion-grid">
 <div><label for="portionFood">食物</label><select id="portionFood"></select></div>
 <div><label for="portionUnit">常见份量</label><select id="portionUnit"></select></div>
@@ -146,12 +147,65 @@ const PORTIONS=[
  {name:'苹果（可食部分）',k:53,p:.3,units:[['一个小苹果',120],['一个中等苹果',170],['一个大苹果',220]]},
  {name:'香蕉（可食部分）',k:93,p:1.1,units:[['一根小香蕉',80],['一根中等香蕉',110],['一根大香蕉',140]]},
  {name:'食用油',k:900,p:0,units:[['一茶匙',5],['一汤匙',10]]},
- {name:'牛奶',k:47,p:3.4,units:[['一杯',200],['一盒',250]]}
+ {name:'牛奶',k:47,p:3.4,units:[['一杯',200],['一盒',250]]},
+ {name:"米粥（熟）",k:45,p:1.1,units:[["一碗",250],["半碗",125]]},
+ {name:"燕麦片（干）",k:380,p:13,units:[["一平汤匙",10],["一小碗干燕麦",45]]},
+ {name:"馒头",k:225,p:7,units:[["一个小馒头",80],["半个",40]]},
+ {name:"全麦面包",k:245,p:10,units:[["一片",35],["两片",70]]},
+ {name:"红薯（熟）",k:90,p:1.5,units:[["一个中等大小",180],["半个",90]]},
+ {name:"土豆（熟）",k:80,p:2,units:[["一个中等大小",150],["半个",75]]},
+ {name:"玉米（可食部分）",k:110,p:3.5,units:[["一根中等",150],["半根",75]]},
+ {name:"米粉（熟）",k:110,p:2,units:[["一碗",200],["半碗",100]]},
+ {name:"饺子（熟）",k:200,p:8,units:[["一个",25],["十个",250]]},
+ {name:"包子",k:230,p:8,units:[["一个中等",90],["半个",45]]},
+ {name:"鸡腿肉（去皮生）",k:135,p:19,units:[["一只去骨鸡腿",150],["手掌大小",100]]},
+ {name:"瘦猪肉（生）",k:140,p:21,units:[["手掌大小",100],["一拳大小",140]]},
+ {name:"鱼肉（生）",k:105,p:20,units:[["手掌大小",120],["一片鱼排",180]]},
+ {name:"虾仁（生）",k:90,p:19,units:[["十只中等虾仁",100],["半碗",90]]},
+ {name:"牛肉丸（熟）",k:210,p:13,units:[["一个",25],["五个",125]]},
+ {name:"香肠",k:280,p:12,units:[["一根",50],["半根",25]]},
+ {name:"北豆腐",k:95,p:11,units:[["一块",100],["半盒",150]]},
+ {name:"嫩豆腐",k:55,p:5,units:[["半盒",150],["一盒",300]]},
+ {name:"豆浆（无糖）",k:30,p:3,units:[["一杯",250],["一盒",300]]},
+ {name:"无糖酸奶",k:65,p:4,units:[["一杯",200],["半杯",100]]},
+ {name:"高蛋白酸奶（参考）",k:70,p:9,units:[["一杯",200],["半杯",100]]},
+ {name:"奶酪",k:300,p:18,units:[["一片",20],["一小块",30]]},
+ {name:"西红柿（生）",k:20,p:1,units:[["一个中等",150],["半个",75]]},
+ {name:"黄瓜（生）",k:16,p:0.8,units:[["一根中等",200],["半根",100]]},
+ {name:"生菜（生）",k:15,p:1.4,units:[["一大把",100],["一片",15]]},
+ {name:"白菜（生）",k:18,p:1.5,units:[["一碗切块",150],["两碗",300]]},
+ {name:"菠菜（生）",k:25,p:2.6,units:[["一把",100],["两把",200]]},
+ {name:"胡萝卜（生）",k:40,p:1,units:[["一根中等",120],["半根",60]]},
+ {name:"青椒（生）",k:25,p:1,units:[["一个中等",100],["半个",50]]},
+ {name:"蘑菇（生）",k:25,p:3,units:[["一把",100],["一碗切块",150]]},
+ {name:"花菜（生）",k:28,p:2,units:[["一拳大小",100],["一碗",150]]},
+ {name:"橙子（可食部分）",k:48,p:0.9,units:[["一个中等",150],["半个",75]]},
+ {name:"梨（可食部分）",k:55,p:0.4,units:[["一个中等",180],["半个",90]]},
+ {name:"西瓜（可食部分）",k:32,p:0.6,units:[["一块",200],["一碗切块",250]]},
+ {name:"葡萄（可食部分）",k:70,p:0.7,units:[["一小把",100],["一碗",180]]},
+ {name:"草莓（可食部分）",k:32,p:0.7,units:[["十颗",150],["五颗",75]]},
+ {name:"坚果混合（无调味）",k:600,p:18,units:[["一小把",20],["一汤匙",12]]},
+ {name:"花生酱",k:600,p:24,units:[["一茶匙",5],["一汤匙",15]]},
+ {name:"白糖",k:400,p:0,units:[["一茶匙",5],["一汤匙",12]]},
+ {name:"蜂蜜",k:320,p:0.3,units:[["一茶匙",7],["一汤匙",20]]},
+ {name:"麻酱",k:600,p:18,units:[["一茶匙",5],["一汤匙",15]]},
+ {name:"酱油",k:65,p:6,units:[["一茶匙",5],["一汤匙",15]]},
+ {name:"可乐（含糖）",k:43,p:0,units:[["一罐",330],["一杯",250]]},
+ {name:"奶茶（含糖，粗估）",k:90,p:1.5,units:[["一杯",500],["半杯",250]]}
 ];
 function showPortionUnits(){const f=PORTIONS[Number(byId('portionFood').value)||0];byId('portionUnit').innerHTML=f.units.map((x,i)=>`<option value="${i}">${x[0]}（约${x[1]}g）</option>`).join('');byId('portionManual').value='';updatePortion()}
 function portionValue(){const f=PORTIONS[Number(byId('portionFood').value)||0],u=f.units[Number(byId('portionUnit').value)||0];const count=Number(byId('portionCount').value),manual=byId('portionManual').value.trim();const grams=manual?Number(manual):u[1]*count;return {f,grams,estimated:!manual,valid:Number.isFinite(grams)&&grams>=1&&grams<=2000}}
 function updatePortion(){const v=portionValue();if(!v.valid){byId('portionResult').textContent='输入有效数量或克数';byId('portionRange').textContent='';return}const {f,grams,estimated}=v;byId('portionResult').textContent=`${estimated?'估计':'修正为'} ${Math.round(grams)}g · ${Math.round(grams*f.k/100)} kcal · 蛋白质 ${(grams*f.p/100).toFixed(1)}g`;byId('portionRange').textContent=estimated?`常见容器误差较大：粗略可能在${Math.round(grams*.7)}–${Math.round(grams*1.3)}g之间。可用厨房秤修正。`:'已按手动重量计算；如果是外卖，还要额外估算食用油及酱汁。'}
-byId('portionFood').innerHTML=PORTIONS.map((f,i)=>`<option value="${i}">${f.name}</option>`).join('');
+function filterPortionFoods(){
+ const q=byId('portionSearch').value.trim().toLowerCase();
+ const el=byId('portionFood'),current=el.value;
+ const matched=PORTIONS.map((f,i)=>({f,i})).filter(x=>!q||x.f.name.toLowerCase().includes(q));
+ el.innerHTML=matched.map(x=>`<option value="${x.i}">${x.f.name}</option>`).join('');
+ if(matched.length){el.value=matched.some(x=>String(x.i)===current)?current:String(matched[0].i);el.disabled=false;byId('portionMatches').textContent=`找到${matched.length}种食物；营养值为每100克参考值，具体品牌和烹饪方式可能不同。`;showPortionUnits()}
+ else{el.disabled=true;byId('portionUnit').innerHTML='';byId('portionMatches').textContent='没有找到该食物。可使用上方“自定义食物”输入名称、克数及每100克营养值。';byId('portionResult').textContent='暂无匹配的食物';byId('portionRange').textContent=''}
+}
+byId('portionSearch').addEventListener('input',filterPortionFoods);
+filterPortionFoods();
 byId('portionFood').onchange=showPortionUnits;
 ['portionUnit','portionCount','portionManual'].forEach(id=>byId(id).addEventListener('input',updatePortion));
 showPortionUnits();
