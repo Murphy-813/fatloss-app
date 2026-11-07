@@ -69,6 +69,7 @@ function renderPlan(){
  const active=document.querySelector('.daybtn.active');active?.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
  const computed=dayStats(day.day),c=getChecks(day.day);
  const resolved=new Set([...c.meals,...c.skippedMeals]).size;
+ const notRecorded=4-resolved;
  const eaten=c.meals.reduce((a,i)=>{const m=mealNow(day.day,i),fraction=Number(c.portions?.[i]??1);return {k:a.k+Number(m?.kcal||0)*fraction,p:a.p+Number(m?.protein||0)*fraction}},{k:0,p:0});
  byId('totalKcal').textContent=computed.kcal;
  byId('totalProtein').textContent=computed.protein;
